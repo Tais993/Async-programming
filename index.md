@@ -105,9 +105,9 @@ So yeah, is this *really* a good solution? I'd say no, it doesn't feel polished,
 So, how about instead using concurrency we use parallelism? Sure! Threads, you can come in now.
 
 Threads, OS-Threads to be specific, using those we can let our processor run multiple things at the same time. You're
-loading a file? Just creete a new thread and do it on there!
+loading a file? Just create a new thread and do it on there!
 
-At least, you'd want to do that. But it's not that simple, threads aren't lightweight. Thread's are heavy. OS-threads
+At least, you'd want to do that. But it's not that simple, threads aren't lightweight. Threads are heavy. OS-threads
 are designed with everything in mind, so they store a lot more data than they require.
 
 So a solution, you use a pool, a ThreadPool. A thread pool re-uses threads, this way you don't constantly create new
@@ -117,7 +117,7 @@ know? It doesn't feel nice, to constantly access a ThreadPool.
 You made it run in parallel, but not concurrent. Everytime your thread gets blocked the OS needs to handle it, which
 happens rather inefficient.
 
-And there also are security issues, a Thread exposes it's thread locals. A thread local is a variable local to the
+And there also are security issues, a Thread exposes its thread locals. A thread local is a variable local to the
 Thread, once set they cannot be removed unless overwritten by a different value. While this makes sense, when in the
 context of a ThreadPool, this means that all tasks using the Thread also get access to the locals.
 
@@ -125,10 +125,10 @@ And last, but not least, due to the fact it's an OS thread, the cancellation pro
 elaborate on this, if a thread calls Thread#interrupt on another thread, this thread sets the status to Interrupted, and
 throws a InterruptedException to all blocking methods. After which the status gets cleared.
 
-The status get's cleared for 2 reasons. First of all, this allows ThreadPool's to re-use the Thread. Second of all, one
+The status gets cleared for 2 reasons. First, this allows ThreadPool's to re-use the Thread. Second of all, one
 might require some of the Thread's blocking methods after an error.
 
-While the purpose of this behaviour, makes sense. It's just rather error prone, preferably we'd want to create a new
+While the purpose of this behaviour, makes sense. It's just rather error-prone, preferably we'd want to create a new
 Thread instead.
 
 To summarize this
@@ -175,7 +175,7 @@ Reactive combines the best and worst of both, it results in a concurrent and par
 To take a look at the definition according to Wikipedia
 > Functional reactive programming (FRP) is a programming paradigm for reactive programming (asynchronous dataflow programming) using the building blocks of functional programming (e.g. map, reduce, filter).
 
-As you might notice, this sounds rather advanced. And unfortunately I'll have to tell you, reactive programming has a
+As you might notice, this sounds advanced. And unfortunately I'll have to tell you, reactive programming has a
 rather steep learning curve.
 
 So to elaborate on what reactive programming is, I'll show you a simple example which we will break down together.
@@ -201,8 +201,6 @@ By using method references, the code becomes a bit more readable, and by (flat)m
 callbacks in callbacks. Sometimes, you will have to wrap your lambda into a method to make it more readable, in the
 example below you'll understand why.
 
-In this example, it is extremely readable, and easy to make. Debugging, while not perfect it's not too hard.
-
 ```java
 public class Application {
     public static void main(String[] args) {
@@ -225,10 +223,10 @@ public class Application {
 
 ```
 
-If you're new to reactive programming, I'm sorry for the heart attack this might gave you. So as you see, concurrent,
+If you're new to reactive programming, I'm sorry for the heart attack this might has given you. So as you see, concurrent,
 parallel, no callback hell, or well it's supposed to be no callback hell.
 
-This looks really bad, which is where something important in the programming wold comes back. Methods, splitting logic into methods.
+This looks awful, which is where something important in the programming world comes back. Methods, splitting logic into methods.
 If Member#hasAcceptedRules is true, it should instead call a method that contains all the logic, this makes it a lot more readable.
 While by far, not even close to perfect. It's still, an improvement. See the result below.
 
@@ -261,16 +259,16 @@ This still isn't something I'd show a beginner, someone needs decent/good progra
 But before I keep complaining about the steep learning-curve, let's go over the benefits.
 
 - Applies concurrency and parallelism
+- A lot of operators making your code more readable (there's method for almost everything possible)
+- Alright to read.
 
 And the issues
 
 - Extremely steep learning curve
-- Hard to read and debug
+- Hard to debug
 
-So, is it really worth the hassle? I mean yeah it's performance, and readable for someone with knowledge, 
+So, is it really worth the hassle? I mean yeah it's performant, and readable for someone with knowledge, 
 but it's steep learning-curve makes it something beginners would be scared of. 
-
-Is there even a solution to these performance issues?
 
 ## Solution 4, the final boss, green threads
 
@@ -293,7 +291,7 @@ All issues, only apply to async methods. So you could say, fibers fixed them by 
 
 - Thread's expose thread locals to everything running in the Thread
 
-This issue existed because you need to re-use threads due to the fact that Thread's are rather expensive.
+This issue existed because you need to re-use threads due to the fact that Threads are rather expensive.
 But fibers, they aren't expensive, you **should** create a new virtual thread for each task.
 So it doesn't expose anything
 
@@ -303,7 +301,7 @@ Since fibers don't have to be re-used, the complexity is removed. One can just c
 
 - No concurrency
 
-Fiber's are handled concurrently, so don't worry about blocking calls! 
+Fibers are handled concurrently, so don't worry about blocking calls! 
 
 ### Issue of solution 3, (Functional) reactive programming
 
@@ -345,10 +343,10 @@ public class Application {
 }
 ```
 
-There, it looks exactly the same like the second solution, Threads. Difference is that it's concurrent,
+There, it looks exactly the same as the second solution, Threads. Difference is that it's concurrent,
 and doesn't have the thread local issues, nor complex cancellation program.
 
-This code runs fully concurrent and parallel. 
+More performant you cannot get, 
 
 Alright, in all honesty, there's 1 issue. Some people don't like the fact that the blocking calls are implicit concurrency.
 But luckily, this is subjective, I personally don't mind this, since it doesn't require major refactoring like Reactive programming or the async-await keyword.
