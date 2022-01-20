@@ -225,11 +225,11 @@ An example can be seen below.
 public class Application {
     public static void main(String[] args) {
         randomServer()
-                .flatmap(Server::getMember)
+                .flatmap(server -> server.getRandomMember())
                 .flatmap((member) -> {
                     if (member.hasAcceptedRules()) {
                        return member.giveRole(Role.STARTER)
-                               .flatmap(Action::hadSuccess, action -> {
+                               .flatmap(action -> action.hadSuccess(), action -> {
                                   user.sendMessage("Gave you the starter role!");
                                }).onErrorFlatmap((action) -> {
                                   return user.sendMessage("Something went wrong, please contact a developer)");
@@ -243,12 +243,12 @@ public class Application {
 
 ```
 
-If you're new to reactive programming, I'm sorry for the heart attack this might has given you. So as you see, concurrent,
+If you're new to reactive programming, I'm sorry for the heart attack this might have given you. So as you see, concurrent,
 parallel, no callback hell, or well it's supposed to be no callback hell.
 
 This looks awful, which is where something important in the programming world comes back. Methods, splitting logic into methods.
 If Member#hasAcceptedRules is true, it should instead call a method that contains all the logic, this makes it a lot more readable.
-Just that change alone, will make a huge difference to the readability and maintainability of your reactive code. 
+Just that change alone, will make a huge difference to the readability and maintainability of your reactive code.
 
 *Java*
 
@@ -256,7 +256,7 @@ Just that change alone, will make a huge difference to the readability and maint
 public class Application {
     public static void main(String[] args) {
         randomServer()
-                .flatmap(Server::getMember)
+                .flatmap(server -> server.randomMember())
                 .flatmap((member) -> {
                     if (member.hasAcceptedRules()) {
                         return handleMemberRuleAccept(member);
@@ -268,7 +268,7 @@ public class Application {
 
     private static RestAction handleMemberRuleAccept(Member member) {
         return member.giveRole(Role.STARTER)
-                .flatmap(Action::hadSuccess, action -> {
+                .flatmap(action -> action.hadSuccess(), action -> {
                     user.sendMessage("Gave you the starter role!");
                 }).onErrorFlatmap((action) -> {
                     return user.sendMessage("Something went wrong, please contact a developer)");
