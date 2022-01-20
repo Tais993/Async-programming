@@ -1,3 +1,6 @@
+
+
+
 ## Terminology
 
 Before we jump into the story, I'll go over some terms we'll be using.
@@ -315,11 +318,9 @@ You don't need to know what it does, all you need to know is that you shouldn't 
 Since it's sync code, it's easy to read.
 Since the same (virtual) thread always runs the code, it's also so much easier to debug.
 
-### Example
+So let's, just take a look at an example.
 
-So let's, just take a look at an example. Is it actually so perfect, I mean there have to be some issues right?
-
-*Note, this is non-existent Java code, creation of the virtual thread would be a bit different, but everything else would be the same*
+*Note, the way the virtual thread is created doesn't exist, it'd look something like this though*
 ```java
 public class Application {
    public static void main(String[] args) {
