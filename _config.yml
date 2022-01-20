@@ -1,2 +1,3 @@
 theme: jekyll-theme-cayman
 title: Async programming
+description: Short article about async programming, and the various issues it's implementations have.
