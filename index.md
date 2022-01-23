@@ -103,6 +103,14 @@ methods now. However, there still are numerous of issues, so let's take a look a
 
 So yeah, is this *really* a good solution? I'd say no, it doesn't feel polished, it's not that pleasant to write either.
 
+
+### Benefits of async-await
+
+I could say as much as I want, but I'd be lying if they were useless. They're really simple, a beginner programmer can really easily adapt to this.
+And that's exactly why it fits so well with JS, a rather simple programming language. Depending on how many OS-threads your runtime has, 
+it's either concurrent or concurrent and parallel.
+
+
 ## Solution 2, OS-Threads
 
 So, how about instead using concurrency we use parallelism? Sure! OS-Threads, you can come in now.
@@ -133,6 +141,10 @@ might require some of the thread's blocking methods after an error.
 
 While the purpose of this behaviour, makes sense. It's just rather error-prone, preferably we'd want to create a new
 thread instead.
+
+And one of the issues I personally notice myself, people don't know how to use threads. All tutorials teach how to manually create threads. 
+In the example below, you also see me manually create a thread, but in reality you'll *rarely* if not *never* do this.
+You want to re-use threads, they're too expensive to waste. This is simple to fix, by teaching people to use pools early.
 
 To summarize this
 - Thread's expose thread locals to everything running in the thread
@@ -170,6 +182,9 @@ concurrency is still being handled by the OS, ineffectively.
 
 It'd be awesome if we somehow, mixed those together in an effective manner? Which is where reactive comes in!
 
+### Benefits
+
+No async-await mess, the virus doesn't spread throughout your codebase. And readability. 
 
 ## Solution 3, (Functional) reactive programming
 
@@ -291,7 +306,26 @@ And the issues
 So, is it really worth the hassle? It's steep learning-curve makes it something a beginner would be scared of. 
 But when you did survive it, and you went through everything, you'll enjoy writing this kind of clean code.
 
-## Solution 4, the final boss, fibers
+### Benefits
+
+Well, this is a hard one. If your language itself doesn't support concurrency in any other way, you can't do a lot besides this.
+But if you can avoid it, I personally would. When used correctly, it can be an incredible tool, but due to its complexity it rarely meats it's potential.
+
+## Solution 4, the final boss, fibers / coroutines
+
+We'll separate this into 2 sub-topics. Self-handled fibers and language maintained. 
+
+
+
+# completely rewrite this tyvm idk how to explain it
+
+
+
+### Self-handled fibers
+
+Self-handled fibers are handled by you, you need to use await-async
+
+### Language maintained fibers
 
 Green threads, fibers, lightweight threads, virtual threads, it doesn't matter how you call them.
 They are the solution, in my eyes. You can code like it's sync, while the code runs in concurrency and parallelism.
@@ -371,3 +405,7 @@ Beautifully simple in the end, no major rewrites required. And this, while it's 
 
 In my eyes, it's perfect! But not everyone agrees, some people don't like the fact that the blocking calls are implicit concurrent.
 And it's upto you to decide whenever you mind that, I personally don't, I trust the implementation enough.
+
+## Benefits
+
+Short summarization of what I mentioned before, it brings support to concurrent, parallel programming without being forced
