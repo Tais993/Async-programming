@@ -2,7 +2,9 @@
 Tijs Beek <Tijs.Beek@vanderlande.com>
 1.1, February 2th, 2022: Initial commit
 :keywords: async, sync, programming, performance
-:source-highlighter: coderay
+:source-highlighter: highlight.js
+:highlightjs-languages: JS, Java
+:highlightjs-theme: agate
 :stylesheet: dark.css
 
 == Terminology
