@@ -1,6 +1,6 @@
 = Async programming
-Tijs Beek <Tijs.Beek@vanderlande.com>
-1.1, February 2th, 2022: Initial commit
+Tijs Beek <tijs@familiebeek.eu>
+PREVIEW, February 2th, 2022: Convert to ascii-doc
 :keywords: async, sync, programming, performance
 :source-highlighter: highlight.js
 :highlightjs-languages: JS, Java
