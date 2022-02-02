@@ -1,35 +1,49 @@
 = Async programming
 Tijs Beek <tijs@familiebeek.eu>
-PREVIEW, February 2th, 2022: Convert to ascii-doc
+PREVIEW, February 2th, 2022: Improved UX by using more asciidoc features
 :keywords: async, sync, programming, performance
 :source-highlighter: highlight.js
 :highlightjs-languages: JS, Java
 :highlightjs-theme: agate
 :stylesheet: dark.css
 
-== Terminology
+:cpu_thread_footnote: footnote:1[a thread that's managed by the CPU]
+:os_thread_footnote: footnote:2[a thread that's managed by the OS]
+:green_thread_footnote: footnote:3[a thread that's managed by the runtime, also known as a green thread, fiber or possibly coroutine]
+:thread_footnote: footnote:4[just any form of thread, can be a CPU-Thread, OS-thread or a green-Thread]
 
-Before we jump into the story, I'll go over some terms we'll be using.
+:concurrent_footnote: footnote:5[multiple threads running on the same core (one by one)]
+:parallel_footnote: footnote:6[multiple threads running at the same time]
+:multithreaded_footnote: footnote:7[multiple threads running concurrently (or in parallel)]
 
-- CPU-Threads, a thread that's managed by the CPU
-- OS-Threads, a thread that's managed by the OS
-- Virtual threads, a thread that's managed by the runtime, also known as a green thread, fiber or possibly coroutine
-- Threads, just any form of thread, can be a CPU-Thread, OS-thread or a green-Thread
-- Concurrently, multiple threads running on the same core (one by one)
-- Parallelism, multiple threads running at the same time
-- Multithreaded, multiple threads running concurrently (or in parallel)
-- Callback, any executable code that is passed as an argument to other code
-- Asynchronous, the occurrence of events independent of the main program flow and ways to deal with such events
-- Data-streams, a sequence of elements made available over time
+:callback_footnote: footnote:7[any executable code that is passed as an argument to other code]
+:asynchronous_footnote: footnote:7[the occurrence of events independent of the main program flow and ways to deal with such events]
+:data-streams_footnote: footnote:7[a sequence of elements made available over time]
+
+
+//== Terminology
+//
+//Before we jump into the story, I'll go over some terms we'll be using.
+//
+//- CPU-Threads, a thread that's managed by the CPU
+//- OS-Threads, a thread that's managed by the OS
+//- Virtual threads, a thread that's managed by the runtime, also known as a green thread, fiber or possibly coroutine
+//- Threads, just any form of thread, can be a CPU-Thread, OS-thread or a green-Thread
+//- Concurrently, multiple threads running on the same core (one by one)
+//- Parallelism, multiple threads running at the same time
+//- Multithreaded, multiple threads running concurrently (or in parallel)
+//- Callback, any executable code that is passed as an argument to other code
+//- Asynchronous, the occurrence of events independent of the main program flow and ways to deal with such events
+//- Data-streams, a sequence of elements made available over time
 
 == The issue, utilization of the CPU
 
-CPU's have multiple cores, and multiple CPU-Threads nowadays.
-Constantly, threads block resulting in the underlying core doing nothing.
+CPU's have multiple cores, and multiple CPU-Threads{cpu_thread_footnote} nowadays.
+Constantly, threads{thread_footnote} block resulting in the underlying core doing nothing.
 Or the cores weren't doing anything in the first place, since there isn't a task for them.
 
 And that's a waste, they should be used as much as possible, as efficiently as possible.
-So let's start at concurrent programming, utilizing a thread as much as possible by switching tasks when one task blocks, which is where the await-async keywords come into the story.
+So let's start at concurrent{concurrent_footnote} programming, utilizing a thread as much as possible by switching tasks when one task blocks, which is where the await-async keywords come into the story.
 
 == Solution 1, Await-async keywords
 
@@ -41,7 +55,7 @@ You make a method async by using the `async` keyword.
 This looks really simple, and like an amazing solution.
 There's a couple of caveats.
 
-1. You can only call async methods in async methods, you can't call an async method in a sync method, unless using a callback.
+1. You can only call async methods in async methods, you can't call an async method in a sync method, unless using a callback.{callback_footnote}
 2. Sync functions return a value, async one's return a wrapper around the value (Future, Promise).
 3. You can't use try-catch, since the async one happens on another thread.
 (Often in callbacks)
@@ -76,8 +90,7 @@ Which is why people came up with the `await` keyword.
 
 === The `await` keyword
 
-The `await` keyword allows people to wait for the method to finish, removing the need of callback.This fixes that sync methods can't call async methods (without a callback), but still numerous issues remain.An example of the `await`
-keyword can be found below.
+The `await` keyword allows people to wait for the method to finish, removing the need of callback.This fixes that sync methods can't call async methods (without a callback), but still numerous issues remain. An example of the `await` keyword can be found below.
 
 [source,js]
 ----
@@ -122,16 +135,15 @@ Depending on how many OS-threads your runtime has, it's either concurrent, or bo
 
 ## Solution 2, OS-Threads
 
-So, how about instead of using concurrency we use parallelism?
+So, how about instead of using concurrency we use parallelism?{parallel_footnote}
 Sure!
-OS-Threads, you can come in now.
+OS-Threads{os_thread_footnote}, you can come in now.
 
 Using OS-Threads we can let our processor run multiple things at the same time.
 You're loading a file?
 Just create a new thread and do it on there!
 
-At least, you'd want to do that.
-It's not that simple, threads aren't lightweight, threads are heavy.
+At least, that sounds like the most logic thing to do, but it's not that simple. Threads aren't lightweight, threads are heavy.
 Threads are designed with everything in mind, so they store a lot more data than they require.
 
 So a solution, you use a pool, a ThreadPool.
@@ -139,7 +151,7 @@ A thread pool re-uses threads, this way you don't constantly create new threads,
 So you achieve parallelism, but still it's not perfect, you know?
 It doesn't feel nice to constantly access a ThreadPool.
 
-You made it run in parallel, but not concurrent.
+You made it run in parallel, but not (optimized) concurrent.
 Everytime your thread gets blocked the OS needs to handle it, which happens rather inefficiently.
 
 // TODO
@@ -206,7 +218,10 @@ Readability improved too.
 
 Reactive combines the best and worst of both, it results in a concurrent and parallel method of programming.
 
-To take a look at the definition according to Wikipedia > Functional reactive programming (FRP) is a programming paradigm for reactive programming (asynchronous dataflow programming) using the building blocks of functional programming (e.g. map, reduce, filter).
+To take a look at the definition according to Wikipedia
+
+[quote, en.wikipedia.org, Functional reactive programming]
+Functional reactive programming (FRP) is a programming paradigm for reactive programming (asynchronous dataflow programming) using the building blocks of functional programming (e.g. map, reduce, filter).
 
 As you might notice, this sounds advanced.
 Unfortunately I'll have to tell you, reactive programming has a rather steep learning curve.
@@ -226,7 +241,7 @@ public class Application {
 }
 ----
 
-A Stream is a so called data-stream.
+A Stream is a so called data-stream{data-streams_footnote}.
 It depends on the kind of data-source how the stream behaves, in this case the stream instantly consists of all possible elements, and no new ones will be added later.
 Due to the size of the stream, there's no need for making it parallel.
 In this specific example, there's nothing concurrent (like streams combining) either.
