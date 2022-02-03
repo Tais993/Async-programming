@@ -1,6 +1,6 @@
 = Async programming
 Tijs Beek <tijs@familiebeek.eu>
-PREVIEW, February 2th, 2022: Improved UX by using more asciidoc features
+Preview v0.1, February 3th, 2022: Improved UX by using more asciidoc features (again)
 :keywords: async, sync, programming, performance
 :source-highlighter: highlight.js
 :highlightjs-languages: JS, Java
@@ -9,7 +9,7 @@ PREVIEW, February 2th, 2022: Improved UX by using more asciidoc features
 
 :cpu_thread_footnote: footnote:1[a thread that's managed by the CPU]
 :os_thread_footnote: footnote:2[a thread that's managed by the OS]
-:green_thread_footnote: footnote:3[a thread that's managed by the runtime, also known as a green thread, fiber or possibly coroutine]
+:green_thread_footnote: footnote:3[a thread that's managed by the runtime, also known as a green thread, fiber, virtual thread or coroutine]
 :thread_footnote: footnote:4[just any form of thread, can be a CPU-Thread, OS-thread or a green-Thread]
 
 :concurrent_footnote: footnote:5[multiple threads running on the same core (one by one)]
@@ -21,20 +21,21 @@ PREVIEW, February 2th, 2022: Improved UX by using more asciidoc features
 :data-streams_footnote: footnote:7[a sequence of elements made available over time]
 
 
-//== Terminology
-//
-//Before we jump into the story, I'll go over some terms we'll be using.
-//
-//- CPU-Threads, a thread that's managed by the CPU
-//- OS-Threads, a thread that's managed by the OS
-//- Virtual threads, a thread that's managed by the runtime, also known as a green thread, fiber or possibly coroutine
-//- Threads, just any form of thread, can be a CPU-Thread, OS-thread or a green-Thread
-//- Concurrently, multiple threads running on the same core (one by one)
-//- Parallelism, multiple threads running at the same time
-//- Multithreaded, multiple threads running concurrently (or in parallel)
-//- Callback, any executable code that is passed as an argument to other code
-//- Asynchronous, the occurrence of events independent of the main program flow and ways to deal with such events
-//- Data-streams, a sequence of elements made available over time
+== Terminology
+
+Before we jump into the story, I'll go over some terms we'll be using.
+If you forget one, you can press on the footnotes.
+
+CPU-Threads:: a thread that's managed by the CPU
+OS-Threads:: a thread that's managed by the OS
+Virtual threads:: a thread that's managed by the runtime, also known as a green thread, fiber or possibly coroutine
+Threads:: just any form of thread, can be a CPU-Thread, OS-thread or a green-Thread
+Concurrently:: multiple threads running on the same core (one by one)
+Parallelism:: multiple threads running at the same time
+Multithreaded:: multiple threads running concurrently (or in parallel)
+Callback:: any executable code that is passed as an argument to other code
+Asynchronous:: the occurrence of events independent of the main program flow and ways to deal with such events
+Data-streams:: a sequence of elements made available over time
 
 == The issue, utilization of the CPU
 
@@ -55,11 +56,11 @@ You make a method async by using the `async` keyword.
 This looks really simple, and like an amazing solution.
 There's a couple of caveats.
 
-1. You can only call async methods in async methods, you can't call an async method in a sync method, unless using a callback.{callback_footnote}
-2. Sync functions return a value, async one's return a wrapper around the value (Future, Promise).
-3. You can't use try-catch, since the async one happens on another thread.
+* You can only call async methods in async methods, you can't call an async method in a sync method, unless using a callback.{callback_footnote}
+* Sync functions return a value, async one's return a wrapper around the value (Future, Promise).
+* You can't use try-catch, since the async one happens on another thread.
 (Often in callbacks)
-4. When using callbacks from code that you never wrote, you have to *trust* them that the callback actually runs.
+* When using callbacks from code that you never wrote, you have to *trust* them that the callback actually runs.
 
 To elaborate on this, take a view at this beautiful callback hell.
 
@@ -118,22 +119,22 @@ The `await` keyword still is annoying, you have to constantly add it to your cod
 This removed 2 of our issues, callback hell is non-existent in this case, and you can call async methods from sync methods now.
 However, there still are numerous issues, so let's take a look at those.
 
-1. Sync functions return values, while async return a Task\<T\> (a wrapper of the value.
-2. Async methods only return the value if you use await, which means your method has to become `async` too
-3. Constant await gibberish, which floods the code
-4. Async methods, are still *async*
+* Sync functions return values, while async return a Task\<T\> (a wrapper of the value.
+* Async methods only return the value if you use await, which means your method has to become `async` too
+* Constant await gibberish, which floods the code
+* Async methods, are still *async*
 
 So yeah, is this *really* a good solution?
 I'd say no, it doesn't feel polished, it's not that pleasant to write either.
 
-### Benefits of async-await
+=== Benefits of async-await
 
 I could say as much as I want, but I'd be lying if I said they were useless.
 They're really simple, a beginner programmer can easily adapt to this.
 And that's exactly why it fits so well with JS, a rather simple programming language.
 Depending on how many OS-threads your runtime has, it's either concurrent, or both concurrent and parallel.
 
-## Solution 2, OS-Threads
+== Solution 2, OS-Threads
 
 So, how about instead of using concurrency we use parallelism?{parallel_footnote}
 Sure!
@@ -151,7 +152,7 @@ A thread pool re-uses threads, this way you don't constantly create new threads,
 So you achieve parallelism, but still it's not perfect, you know?
 It doesn't feel nice to constantly access a ThreadPool.
 
-You made it run in parallel, but not (optimized) concurrent.
+You made it run in parallel, but not (optimized) concurrent{concurrent_footnote}.
 Everytime your thread gets blocked the OS needs to handle it, which happens rather inefficiently.
 
 // TODO
@@ -259,7 +260,7 @@ After this, we loop through all methods, you can compare this to a for loop.
 We print its value to the console.
 
 So what you saw it the data-stream going through many functions, that change the elements of the data-stream.
-This can be compared to C#'s LINQ, and many Rx libraries in languages (RxJAva, RxPy, RxJS).
+This can be compared to C#'s LINQ, this is a more basic version of Rx libraries in languages (RxJAva, RxPy, RxJS).
 
 Before I'll show you a more Rx like example, I'll go over a few more terms relating to functional reactive programming.
 
@@ -294,7 +295,7 @@ If you're new to reactive programming, I'm sorry for the heart attack this might
 So as you see, concurrent, parallel, no callback hell, or well it's supposed to be no callback hell.
 
 This looks awful, which is where something important in the programming world comes back.
-Methods, splitting logic into methods.
+Methods, splitting logic.
 If Member#hasAcceptedRules is true, it should instead call a method that contains all the logic, this makes it a lot more readable.
 Just that change alone, will make a huge difference to the readability and maintainability of your reactive code.
 
@@ -344,12 +345,12 @@ But when you did survive it, and you went through everything, you'll enjoy writi
 Well, this is a hard one.
 If your language itself doesn't support concurrency in any other way, you can't do a lot besides this.
 But if you can avoid it, I personally would.
-When used correctly, it can be an incredible tool, but due to its complexity it rarely meats it's potential.
+When used correctly, it can be an incredible tool, but due to its complexity it rarely meets its potential.
 
 == Solution 4, the final boss, fibers / coroutines
 
 We'll separate this into 2 sub-topics.
-Self-handled fibers and language maintained.
+Self-handled fibers{green_thread_footnote} and language maintained.
 
 == completely rewrite this tyvm idk how to explain it
 
