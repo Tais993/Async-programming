@@ -1,6 +1,6 @@
 = Async programming
 Tijs Beek <tijs@familiebeek.eu>
-Preview v0.1, February 3th, 2022: Improved UX by using more asciidoc features (again)
+Preview v0.1.1, February 3th, 2022: Made terminology collapsible
 :keywords: async, sync, programming, performance
 :source-highlighter: highlight.js
 :highlightjs-languages: JS, Java
@@ -20,12 +20,10 @@ Preview v0.1, February 3th, 2022: Improved UX by using more asciidoc features (a
 :asynchronous_footnote: footnote:7[the occurrence of events independent of the main program flow and ways to deal with such events]
 :data-streams_footnote: footnote:7[a sequence of elements made available over time]
 
-
 == Terminology
-
-Before we jump into the story, I'll go over some terms we'll be using.
-If you forget one, you can press on the footnotes.
-
+Click to see all the terms we'll be talking about, you can always find the definition by pressing on their footnote.
+[%collapsible]
+====
 CPU-Threads:: a thread that's managed by the CPU
 OS-Threads:: a thread that's managed by the OS
 Virtual threads:: a thread that's managed by the runtime, also known as a green thread, fiber or possibly coroutine
@@ -36,6 +34,7 @@ Multithreaded:: multiple threads running concurrently (or in parallel)
 Callback:: any executable code that is passed as an argument to other code
 Asynchronous:: the occurrence of events independent of the main program flow and ways to deal with such events
 Data-streams:: a sequence of elements made available over time
+====
 
 == The issue, utilization of the CPU
 
