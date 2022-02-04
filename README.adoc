@@ -20,6 +20,8 @@ Preview v0.1.1, February 3th, 2022: Made terminology collapsible
 :asynchronous_footnote: footnote:7[the occurrence of events independent of the main program flow and ways to deal with such events]
 :data-streams_footnote: footnote:7[a sequence of elements made available over time]
 
+== See https://tais993.github.io/Async-programming/ for website version
+
 == Terminology
 Click to see all the terms we'll be talking about, you can always find the definition by pressing on their footnote.
 [%collapsible]
