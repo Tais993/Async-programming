@@ -1,0 +1,809 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="generator" content="Asciidoctor 2.0.17">
+<meta name="keywords" content="async, sync, programming, performance">
+<meta name="author" content="Tijs Beek">
+<title>Async programming</title>
+<style>
+/* Asciidoctor default stylesheet | MIT License | https://asciidoctor.org */
+
+@import url(//fonts.googleapis.com/css?family=Noto+Sans);
+@import url(https://cdn.jsdelivr.net/gh/asciidoctor/asciidoctor@2.0/data/stylesheets/asciidoctor-default.css); /* Default asciidoc style framework - important */
+
+/* CUSTOMISATIONS */
+/* Change the values in root for quick customisation. If you want even more fine grain... venture further. */
+:root{
+    --maincolor:#282c34;
+    --primarycolor:#f39c12;
+    --secondarycolor:#03a9f4;
+    --tertiarycolor:#4db6ac;
+    --sidebarbackground:#21252b;
+    --linkcolor:#f44336;
+    --linkcoloralternate:#ff9800;
+    --white:#FFFFFF;
+}
+
+/* Text styles */
+
+body{font-family: "Noto Sans",sans-serif;background-color: var(--maincolor);color:var(--white);}
+
+h1{color:var(--primarycolor) !important;font-family:"Noto Sans",sans-serif;}
+h2,h3,h4,h5,h6{color:var(--secondarycolor) !important;font-family:"Noto Sans",sans-serif;}
+.title{color:var(--white) !important;font-family:"Noto Sans",sans-serif;font-style: normal; font-weight: normal;}
+p{font-family: "Noto Sans",sans-serif ! important}
+#toc.toc2 a:link{color:var(--linkcolor);}
+blockquote{color:var(--tertiarycolor) !important}
+.quoteblock{color:var(--white)}
+code{color:var(--linkcoloralternate);background-color: var(--sidebarbackground) !important}
+
+
+/* Table styles */
+th{background-color: var(--maincolor);color:var(--white) !important;}
+td{background-color: var(--maincolor);color: var(--linkcoloralternate) !important}
+
+
+#toc.toc2{background-color:var(--sidebarbackground);}
+#toctitle{color:var(--white);}
+
+/* Responsiveness fixes */
+video {
+    max-width: 100%;
+}
+
+@media all and (max-width: 600px) {
+    table {
+        width: 55vw!important;
+        font-size: 3vw;
+    }
+}
+
+.exampleblock > .content {
+    background-color: var(--maincolor);
+}
+
+a {
+    color: var(--secondarycolor);
+}
+
+.admonitionblock td.icon .icon-tip::before {
+    text-shadow: none;
+    color: var(--white);
+}
+.admonitionblock td.icon .icon-note::before {
+    color: var(--tertiarycolor);
+}
+.admonitionblock td.icon .icon-important::before {
+    color: var(--linkcolor);
+}
+/*.admonitionblock td.icon .icon-caution::before {
+  color: var(--linkcoloralternate);
+}*/
+.admonitionblock td.icon .icon-warning::before {
+    color: var(--primarycolor);
+}
+
+#preamble > .sectionbody > .paragraph:first-of-type p {
+    color: var(--white);
+}
+
+.quoteblock blockquote::before {
+    color: var(--primarycolor);
+}
+.quoteblock .attribution cite, .verseblock .attribution cite {
+    color: var(--white);
+}
+.verseblock pre {
+    color: var(--white);
+}
+.quoteblock blockquote, .quoteblock blockquote p {
+    color: var(--white);
+}
+
+.sidebarblock {
+    background: var(--sidebarbackground);
+}
+.literalblock pre, .listingblock pre:not(.highlight), .listingblock pre[class="highlight"], .listingblock pre[class^="highlight "], .listingblock pre.CodeRay, .listingblock pre.prettyprint {
+    background: var(--sidebarbackground);
+    color: var(--white);
+}
+
+#header .details {
+    color: var(--white);
+}
+#header .details span.email a {
+    color: var(--linkcoloralternate);
+}
+
+</style>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.18.3/styles/agate.min.css">
+</head>
+<body class="article">
+<div id="header">
+<h1>Async programming</h1>
+<div class="details">
+<span id="author" class="author">Tijs Beek</span><br>
+<span id="email" class="email"><a href="mailto:tijs@familiebeek.eu">tijs@familiebeek.eu</a></span><br>
+<span id="revnumber">version 0.1.1,</span>
+<span id="revdate">February 3th, 2022</span>
+<br><span id="revremark">Made terminology collapsible</span>
+</div>
+</div>
+<div id="content">
+<div class="sect1">
+<h2 id="_see_httpstais993_github_ioasync_programming_for_website_version">See <a href="https://tais993.github.io/Async-programming/" class="bare">https://tais993.github.io/Async-programming/</a> for website version</h2>
+<div class="sectionbody">
+
+</div>
+</div>
+<div class="sect1">
+<h2 id="_terminology">Terminology</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Click to see all the terms we&#8217;ll be talking about, you can always find the definition by pressing on their footnote.</p>
+</div>
+<details>
+<summary class="title">Details</summary>
+<div class="content">
+<div class="dlist">
+<dl>
+<dt class="hdlist1">CPU-Threads</dt>
+<dd>
+<p>a thread that&#8217;s managed by the CPU</p>
+</dd>
+<dt class="hdlist1">OS-Threads</dt>
+<dd>
+<p>a thread that&#8217;s managed by the OS</p>
+</dd>
+<dt class="hdlist1">Virtual threads</dt>
+<dd>
+<p>a thread that&#8217;s managed by the runtime, also known as a green thread, fiber or possibly coroutine</p>
+</dd>
+<dt class="hdlist1">Threads</dt>
+<dd>
+<p>just any form of thread, can be a CPU-Thread, OS-thread or a green-Thread</p>
+</dd>
+<dt class="hdlist1">Concurrently</dt>
+<dd>
+<p>multiple threads running on the same core (one by one)</p>
+</dd>
+<dt class="hdlist1">Parallelism</dt>
+<dd>
+<p>multiple threads running at the same time</p>
+</dd>
+<dt class="hdlist1">Multithreaded</dt>
+<dd>
+<p>multiple threads running concurrently (or in parallel)</p>
+</dd>
+<dt class="hdlist1">Callback</dt>
+<dd>
+<p>any executable code that is passed as an argument to other code</p>
+</dd>
+<dt class="hdlist1">Asynchronous</dt>
+<dd>
+<p>the occurrence of events independent of the main program flow and ways to deal with such events</p>
+</dd>
+<dt class="hdlist1">Data-streams</dt>
+<dd>
+<p>a sequence of elements made available over time</p>
+</dd>
+</dl>
+</div>
+</div>
+</details>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_the_issue_utilization_of_the_cpu">The issue, utilization of the CPU</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>CPU&#8217;s have multiple cores, and multiple CPU-Threads<sup class="footnote" id="_footnote_1">[<a id="_footnoteref_1" class="footnote" href="#_footnotedef_1" title="View footnote.">1</a>]</sup> nowadays.
+Constantly, threads<sup class="footnote" id="_footnote_4">[<a id="_footnoteref_2" class="footnote" href="#_footnotedef_2" title="View footnote.">2</a>]</sup> block resulting in the underlying core doing nothing.
+Or the cores weren&#8217;t doing anything in the first place, since there isn&#8217;t a task for them.</p>
+</div>
+<div class="paragraph">
+<p>And that&#8217;s a waste, they should be used as much as possible, as efficiently as possible.
+So let&#8217;s start at concurrent<sup class="footnote" id="_footnote_5">[<a id="_footnoteref_3" class="footnote" href="#_footnotedef_3" title="View footnote.">3</a>]</sup> programming, utilizing a thread as much as possible by switching tasks when one task blocks, which is where the await-async keywords come into the story.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_solution_1_await_async_keywords">Solution 1, Await-async keywords</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Grab your coloring book, kids!
+We&#8217;re going to start "coloring" our methods.</p>
+</div>
+<div class="paragraph">
+<p>We have 2 types, async and sync methods.
+You make a method async by using the <code>async</code> keyword.
+This looks really simple, and like an amazing solution.
+There&#8217;s a couple of caveats.</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>You can only call async methods in async methods, you can&#8217;t call an async method in a sync method, unless using a callback.<sup class="footnote" id="_footnote_7">[<a id="_footnoteref_4" class="footnote" href="#_footnotedef_4" title="View footnote.">4</a>]</sup></p>
+</li>
+<li>
+<p>Sync functions return a value, async one&#8217;s return a wrapper around the value (Future, Promise).</p>
+</li>
+<li>
+<p>You can&#8217;t use try-catch, since the async one happens on another thread.
+(Often in callbacks)</p>
+</li>
+<li>
+<p>When using callbacks from code that you never wrote, you have to <strong>trust</strong> them that the callback actually runs.</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>To elaborate on this, take a view at this beautiful callback hell.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-js hljs" data-lang="js">randomServer(function (server) {
+    server.getRandomMember(function (member) {
+        if (member.hasAcceptedRules) {
+            member.giveRole(Role.STARTER, function (action) {
+                if (action.hadSuccess) {
+                    user.sendMessage("Gave you the starter role!");
+                } else {
+                    user.sendMessage("Something went wrong, please contact a developer)");
+                }
+            });
+        } else {
+            user.sendMessage("You haven't accepted the rules yet, therefor I'll not give you the starter role.");
+        }
+    })
+});</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>There is a ton of callbacks in this code, which makes it really hard to read.
+It goes inside a method, inside a method, inside another method.
+Can&#8217;t forget that debugging will be less enjoyable in this case either.</p>
+</div>
+<div class="paragraph">
+<p>Which is why people came up with the <code>await</code> keyword.</p>
+</div>
+<div class="sect2">
+<h3 id="_the_await_keyword">The <code>await</code> keyword</h3>
+<div class="paragraph">
+<p>The <code>await</code> keyword allows people to wait for the method to finish, removing the need of callback.This fixes that sync methods can&#8217;t call async methods (without a callback), but still numerous issues remain. An example of the <code>await</code> keyword can be found below.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-js hljs" data-lang="js">var server = await randomServer();
+var member = await server.getRandomMember();
+
+if (member.hasAcceptedRules()) {
+    var action = await member.giveRole(Role.STARTER);
+
+    if (action.hadSuccess()) {
+        user.sendMessage("Gave you the starter role!");
+    } else {
+        user.sendMessage("Something went wrong, please contact a developer)");
+    }
+} else {
+    user.sendMessage("You haven't accepted the rules yet, therefor I'll not give you the starter role.");
+}</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>Notice how much easier it is to read, by all means it&#8217;s still not perfect, it is a lot easier.
+The <code>await</code> keyword still is annoying, you have to constantly add it to your code``.</p>
+</div>
+<div class="paragraph">
+<p>This removed 2 of our issues, callback hell is non-existent in this case, and you can call async methods from sync methods now.
+However, there still are numerous issues, so let&#8217;s take a look at those.</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>Sync functions return values, while async return a Task\&lt;T\&gt; (a wrapper of the value.</p>
+</li>
+<li>
+<p>Async methods only return the value if you use await, which means your method has to become <code>async</code> too</p>
+</li>
+<li>
+<p>Constant await gibberish, which floods the code</p>
+</li>
+<li>
+<p>Async methods, are still <strong>async</strong></p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>So yeah, is this <strong>really</strong> a good solution?
+I&#8217;d say no, it doesn&#8217;t feel polished, it&#8217;s not that pleasant to write either.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_benefits_of_async_await">Benefits of async-await</h3>
+<div class="paragraph">
+<p>I could say as much as I want, but I&#8217;d be lying if I said they were useless.
+They&#8217;re really simple, a beginner programmer can easily adapt to this.
+And that&#8217;s exactly why it fits so well with JS, a rather simple programming language.
+Depending on how many OS-threads your runtime has, it&#8217;s either concurrent, or both concurrent and parallel.</p>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_solution_2_os_threads">Solution 2, OS-Threads</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>So, how about instead of using concurrency we use parallelism?<sup class="footnote" id="_footnote_6">[<a id="_footnoteref_5" class="footnote" href="#_footnotedef_5" title="View footnote.">5</a>]</sup>
+Sure!
+OS-Threads<sup class="footnote" id="_footnote_2">[<a id="_footnoteref_6" class="footnote" href="#_footnotedef_6" title="View footnote.">6</a>]</sup>, you can come in now.</p>
+</div>
+<div class="paragraph">
+<p>Using OS-Threads we can let our processor run multiple things at the same time.
+You&#8217;re loading a file?
+Just create a new thread and do it on there!</p>
+</div>
+<div class="paragraph">
+<p>At least, that sounds like the most logic thing to do, but it&#8217;s not that simple. Threads aren&#8217;t lightweight, threads are heavy.
+Threads are designed with everything in mind, so they store a lot more data than they require.</p>
+</div>
+<div class="paragraph">
+<p>So a solution, you use a pool, a ThreadPool.
+A thread pool re-uses threads, this way you don&#8217;t constantly create new threads, and only create new ones when it&#8217;s actually needed.
+So you achieve parallelism, but still it&#8217;s not perfect, you know?
+It doesn&#8217;t feel nice to constantly access a ThreadPool.</p>
+</div>
+<div class="paragraph">
+<p>You made it run in parallel, but not (optimized) concurrent<sup class="footnoteref">[<a class="footnote" href="#_footnotedef_3" title="View footnote.">3</a>]</sup>.
+Everytime your thread gets blocked the OS needs to handle it, which happens rather inefficiently.</p>
+</div>
+<div class="paragraph">
+<p>Also, there are security issues, a thread exposes its thread locals.
+A thread local is a variable local to the thread, once set they cannot be removed unless overwritten by a different value.
+While this makes sense, when in the context of a ThreadPool, this means that all tasks using the thread also get access to the locals.</p>
+</div>
+<div class="paragraph">
+<p>And last, but not least, due to the fact it&#8217;s an OS-thread, the cancellation program is rather complex and expensive.
+To elaborate on this, if a thread interrupts another thread, this thread sets the status to Interrupted, and throws an exception to all blocking methods.
+After which the status gets cleared.</p>
+</div>
+<div class="paragraph">
+<p>The status gets cleared for 2 reasons.
+First, this allows ThreadPool&#8217;s to re-use the thread.
+Second of all, one might require some of the thread&#8217;s blocking methods after an error.</p>
+</div>
+<div class="paragraph">
+<p>While the purpose of this behaviour makes sense, it&#8217;s just rather error-prone.
+Preferably we&#8217;d want to create a new thread instead.</p>
+</div>
+<div class="paragraph">
+<p>And one of the issues I personally notice myself, people don&#8217;t know how to use threads.
+All tutorials teach how to manually create threads.
+In the example below, you also see me manually create a thread, but in reality you&#8217;ll <strong>rarely</strong> if not <strong>ever</strong> do this.
+You want to re-use threads, they&#8217;re too expensive to waste.
+This is simple to fix, by teaching people to use pools early.</p>
+</div>
+<div class="paragraph">
+<p>To summarize this - Thread&#8217;s expose thread locals to everything running in the thread - Complex cancellation program - No concurrency</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">public class Application {
+    public static void main(String[] args) {
+        new Thread(() -&gt; {
+            var server = randomServer();
+            var member = server.getRandomMember();
+
+            if (member.hasAcceptedRules()) {
+                var action = member.giveRole(Role.STARTER);
+
+                if (action.hadSuccess()) {
+                    user.sendMessage("Gave you the starter role!");
+                } else {
+                    user.sendMessage("Something went wrong, please contact a developer)");
+                }
+            } else {
+                user.sendMessage("You haven't accepted the rules yet, therefor I'll not give you the starter role.");
+            }
+        });
+    }
+}</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>But at least, the code is readable, no await, no playing around with Task&lt;T&gt;.
+This runs in parallel, the concurrency is still being handled by the OS, inefficiently.</p>
+</div>
+<div class="paragraph">
+<p>It&#8217;d be awesome if we somehow, mixed those together in an effective manner?
+Which is where reactive comes in!</p>
+</div>
+<div class="sect2">
+<h3 id="_benefits">Benefits</h3>
+<div class="paragraph">
+<p>No async-await mess, the virus doesn&#8217;t spread throughout your codebase.
+Readability improved too.</p>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_solution_3_functional_reactive_programming">Solution 3, (Functional) reactive programming</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Reactive combines the best and worst of both, it results in a concurrent and parallel method of programming.</p>
+</div>
+<div class="paragraph">
+<p>To take a look at the definition according to Wikipedia</p>
+</div>
+<div class="quoteblock">
+<blockquote>
+Functional reactive programming (FRP) is a programming paradigm for reactive programming (asynchronous dataflow programming) using the building blocks of functional programming (e.g. map, reduce, filter).
+</blockquote>
+<div class="attribution">
+&#8212; en.wikipedia.org<br>
+<cite>Functional reactive programming</cite>
+</div>
+</div>
+<div class="paragraph">
+<p>As you might notice, this sounds advanced.
+Unfortunately I&#8217;ll have to tell you, reactive programming has a rather steep learning curve.</p>
+</div>
+<div class="paragraph">
+<p>So to elaborate on what reactive programming is, I&#8217;ll show you a simple example which we will break down together.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">public class Application {
+    public static void main(String[] args) {
+        Stream.of("yeppers", "something", "buzz", "fuzz", "bar")
+                .filter(str -&gt; s.startsWith("b"))
+                .map(str -&gt; s.toUpperCase())
+                .sorted()
+                .forEach(str -&gt; System.out.println(s));
+    }
+}</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>A Stream is a so called data-stream<sup class="footnoteref">[<a class="footnote" href="#_footnotedef_4" title="View footnote.">4</a>]</sup>.
+It depends on the kind of data-source how the stream behaves, in this case the stream instantly consists of all possible elements, and no new ones will be added later.
+Due to the size of the stream, there&#8217;s no need for making it parallel.
+In this specific example, there&#8217;s nothing concurrent (like streams combining) either.
+This is just, to show how a stream looks.</p>
+</div>
+<div class="paragraph">
+<p>To refer to the example, you create a data-stream (Stream#of).
+The first thing that happens is a filter, a common function in reactive programming.
+This filter applies the given predicate to each element, and only if true is returned the element will stay in the data-stream.
+Following a map, a map is a function that applies the given function to the element(s), this is very common in reactive programming.
+A map allows you to, convert items.
+In this example it makes the existing string fully upper-case.
+It can also convert to something of a different type.
+Now we sort, this sort is the default sort of Java&#8217;s Stream#sorted method, which sorts it in natural order.
+After this, we loop through all methods, you can compare this to a for loop.
+We print its value to the console.</p>
+</div>
+<div class="paragraph">
+<p>So what you saw it the data-stream going through many functions, that change the elements of the data-stream.
+This can be compared to C#'s LINQ, this is a more basic version of Rx libraries in languages (RxJAva, RxPy, RxJS).</p>
+</div>
+<div class="paragraph">
+<p>Before I&#8217;ll show you a more Rx like example, I&#8217;ll go over a few more terms relating to functional reactive programming.</p>
+</div>
+<div class="paragraph">
+<p>You saw map before, but how about flatmap?
+Flatmap is an implementation that <strong>maps</strong> a data-stream into another data-stream.
+Instead of mapping, which will result in a data-stream in a data-stream, you flatmap and return the data-stream.
+This will also allow some things giving us nicer error handling, onErrorFlatMap, if an error comes. flatmap this into a data-stream (of the same type) An example can be seen below.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">public class Application {
+    public static void main(String[] args) {
+        randomServer()
+                .flatmap(server -&gt; server.getRandomMember())
+                .flatmap((member) -&gt; {
+                    if (member.hasAcceptedRules()) {
+                        return member.giveRole(Role.STARTER)
+                                .flatmap(action -&gt; action.hadSuccess(), action -&gt; {
+                                    user.sendMessage("Gave you the starter role!");
+                                }).onErrorFlatmap((action) -&gt; {
+                                    return user.sendMessage("Something went wrong, please contact a developer)");
+                                });
+                    } else {
+                        return user.sendMessage("You haven't accepted the rules yet, therefor I'll not give you the starter role.");
+                    }
+                });
+    }
+}</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>If you&#8217;re new to reactive programming, I&#8217;m sorry for the heart attack this might have given you.
+So as you see, concurrent, parallel, no callback hell, or well it&#8217;s supposed to be no callback hell.</p>
+</div>
+<div class="paragraph">
+<p>This looks awful, which is where something important in the programming world comes back.
+Methods, splitting logic.
+If Member#hasAcceptedRules is true, it should instead call a method that contains all the logic, this makes it a lot more readable.
+Just that change alone, will make a huge difference to the readability and maintainability of your reactive code.</p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">public class Application {
+    public static void main(String[] args) {
+        randomServer()
+                .flatmap(server -&gt; server.randomMember())
+                .flatmap((member) -&gt; {
+                    if (member.hasAcceptedRules()) {
+                        return handleMemberRuleAccept(member);
+                    } else {
+                        return user.sendMessage("You haven't accepted the rules yet, therefor I'll not give you the starter role.");
+                    }
+                });
+    }
+
+    private static RestAction handleMemberRuleAccept(Member member) {
+        return member.giveRole(Role.STARTER)
+                .flatmap(action -&gt; action.hadSuccess(), action -&gt; {
+                    user.sendMessage("Gave you the starter role!");
+                }).onErrorFlatmap((action) -&gt; {
+                    return user.sendMessage("Something went wrong, please contact a developer)");
+                });
+    }
+}</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>This still isn&#8217;t something I&#8217;d show a beginner, someone needs decent/good programming knowledge to read this, and especially to write this.
+But before I keep complaining about the steep learning-curve, let&#8217;s go over the benefits.</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>Applies concurrency and parallelism</p>
+</li>
+<li>
+<p>It&#8217;s good for maintainability and readability when using the correct methods (and when correctly splitting logic up in methods)</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>And the issues</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>Extremely steep learning curve</p>
+</li>
+<li>
+<p>Hard to debug</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>So, is it really worth the hassle?
+It&#8217;s steep learning-curve makes it something a beginner would be scared of.
+But when you did survive it, and you went through everything, you&#8217;ll enjoy writing this kind of clean code.</p>
+</div>
+<div class="sect2">
+<h3 id="_benefits_2">Benefits</h3>
+<div class="paragraph">
+<p>Well, this is a hard one.
+If your language itself doesn&#8217;t support concurrency in any other way, you can&#8217;t do a lot besides this.
+But if you can avoid it, I personally would.
+When used correctly, it can be an incredible tool, but due to its complexity it rarely meets its potential.</p>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_solution_4_the_final_boss_fibers_coroutines">Solution 4, the final boss, fibers / coroutines</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>We&#8217;ll separate this into 2 sub-topics.
+Self-handled fibers<sup class="footnote" id="_footnote_3">[<a id="_footnoteref_7" class="footnote" href="#_footnotedef_7" title="View footnote.">7</a>]</sup> and language maintained.</p>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_completely_rewrite_this_tyvm_idk_how_to_explain_it">completely rewrite this tyvm idk how to explain it</h2>
+<div class="sectionbody">
+<div class="sect2">
+<h3 id="_self_handled_fibers">Self-handled fibers</h3>
+<div class="paragraph">
+<p>Self-handled fibers are handled by you, you need to use await-async</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_language_maintained_fibers">Language maintained fibers</h3>
+<div class="paragraph">
+<p>Green threads, fibers, lightweight threads, virtual threads, it doesn&#8217;t matter how you call them.
+They are the solution, in my eyes.
+You can code like it&#8217;s sync, while the code runs in concurrency and parallelism.</p>
+</div>
+<div class="paragraph">
+<p>Let&#8217;s go over all the issues we found with all the other solutions, and check or these apply here.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_issues_of_solution_1_async_keyword">Issues of solution 1, async keyword</h3>
+<div class="ulist">
+<ul>
+<li>
+<p>You can only call async methods in async methods, you can&#8217;t call an async method in a sync method. (unless using a callback)</p>
+</li>
+<li>
+<p>Sync functions return a value, async one&#8217;s return a wrapper around the value (Future, Promise)</p>
+</li>
+<li>
+<p>You can&#8217;t use try-catch, since the async one happens on another thread.
+(Often in callbacks)</p>
+</li>
+<li>
+<p>When using callbacks from code that you never wrote, you have to trust them that the callback actually runs.</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>All issues, only apply to async methods.
+So you could say, fibers fixed them by removing async methods all together.</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_issues_of_solution_2_os_threads">Issues of solution 2, OS-Threads</h3>
+<div class="ulist">
+<ul>
+<li>
+<p>Thread&#8217;s expose thread locals to everything running in the thread</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>This issue came into existence once people started to re-use threads due to the fact that threads are rather expensive.
+But fibers, they aren&#8217;t expensive, you <strong>should</strong> create a new fiber for each task.
+So it doesn&#8217;t expose anything</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>Complex cancellation program</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>Since fibers don&#8217;t have to be re-used, the complexity is removed.
+One can just create a new fiber if someone goes wrong.</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>No concurrency</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>Fibers are handled concurrently, so don&#8217;t worry about blocking calls!</p>
+</div>
+</div>
+<div class="sect2">
+<h3 id="_issue_of_solution_3_functional_reactive_programming">Issue of solution 3, (Functional) reactive programming</h3>
+<div class="ulist">
+<ul>
+<li>
+<p>Extremely steep learning curve</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>You don&#8217;t need to know what fibers exactly do, only the basics, that they run concurrent and in parallel.While that&#8217;s not something you know from birth, it isn&#8217;t something you need months to study either.The most important part is that people shouldn&#8217;t feel afraid to create a new fiber.
+And people shouldn&#8217;t re-use fibers either.</p>
+</div>
+<div class="ulist">
+<ul>
+<li>
+<p>Hard to read and debug</p>
+</li>
+</ul>
+</div>
+<div class="paragraph">
+<p>Since it&#8217;s sync code, it&#8217;s easy to read.Since the same fiber always runs the code, it&#8217;s also so much easier to debug.</p>
+</div>
+<div class="paragraph">
+<p>So let&#8217;s, just take a look at an example.</p>
+</div>
+<div class="paragraph">
+<p><strong>Note, the way the fiber is created doesn&#8217;t exist, this is to show the idea, it&#8217;s exact implementations might differ</strong>
+<strong>Java</strong></p>
+</div>
+<div class="listingblock">
+<div class="content">
+<pre class="highlightjs highlight"><code class="language-java hljs" data-lang="java">public class Application {
+    public static void main(String[] args) {
+        new VirtualThread(() -&gt; {
+            var server = randomServer();
+            var member = server.getRandomMember();
+
+            if (member.hasAcceptedRules()) {
+                var action = member.giveRole(Role.STARTER);
+
+                if (action.hadSuccess()) {
+                    user.sendMessage("Gave you the starter role!");
+                } else {
+                    user.sendMessage("Something went wrong, please contact a developer)");
+                }
+            } else {
+                user.sendMessage("You haven't accepted the rules yet, therefor I'll not give you the starter role.");
+            }
+        });
+    }
+}</code></pre>
+</div>
+</div>
+<div class="paragraph">
+<p>There, it looks exactly the same as the second solution, OS-Threads.Difference is that it&#8217;s concurrent, and doesn&#8217;t have the thread local issues, nor complex cancellation program.</p>
+</div>
+<div class="paragraph">
+<p>Beautifully simple in the end, no major rewrites required.This, while it&#8217;s still really performant, if not even more than reactive libraries.</p>
+</div>
+<div class="paragraph">
+<p>In my eyes, it&#8217;s perfect!But not everyone agrees, some people don&#8217;t like the fact that the blocking calls are implicit concurrent.
+And it&#8217;s upto you to decide whenever you mind that, I personally don&#8217;t, I trust the implementation enough.</p>
+</div>
+</div>
+</div>
+</div>
+<div class="sect1">
+<h2 id="_benefits_3">Benefits</h2>
+<div class="sectionbody">
+<div class="paragraph">
+<p>Short summarization of what I mentioned before, it brings support to concurrent, parallel programming without being forced</p>
+</div>
+</div>
+</div>
+</div>
+<div id="footnotes">
+<hr>
+<div class="footnote" id="_footnotedef_1">
+<a href="#_footnoteref_1">1</a>. a thread that&#8217;s managed by the CPU
+</div>
+<div class="footnote" id="_footnotedef_2">
+<a href="#_footnoteref_2">2</a>. just any form of thread, can be a CPU-Thread, OS-thread or a green-Thread
+</div>
+<div class="footnote" id="_footnotedef_3">
+<a href="#_footnoteref_3">3</a>. multiple threads running on the same core (one by one)
+</div>
+<div class="footnote" id="_footnotedef_4">
+<a href="#_footnoteref_4">4</a>. any executable code that is passed as an argument to other code
+</div>
+<div class="footnote" id="_footnotedef_5">
+<a href="#_footnoteref_5">5</a>. multiple threads running at the same time
+</div>
+<div class="footnote" id="_footnotedef_6">
+<a href="#_footnoteref_6">6</a>. a thread that&#8217;s managed by the OS
+</div>
+<div class="footnote" id="_footnotedef_7">
+<a href="#_footnoteref_7">7</a>. a thread that&#8217;s managed by the runtime, also known as a green thread, fiber, virtual thread or coroutine
+</div>
+</div>
+<div id="footer">
+<div id="footer-text">
+Version 0.1.1<br>
+Last updated 2022-02-04 10:15:14 UTC
+</div>
+</div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.18.3/highlight.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.18.3/languages/JS.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.18.3/languages/Java.min.js"></script>
+<script>
+if (!hljs.initHighlighting.called) {
+  hljs.initHighlighting.called = true
+  ;[].slice.call(document.querySelectorAll('pre.highlight > code')).forEach(function (el) { hljs.highlightBlock(el) })
+}
+</script>
+</body>
+</html>
